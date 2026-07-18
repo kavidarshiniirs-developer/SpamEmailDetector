@@ -17,4 +17,4 @@ An AI-powered Spam Email Detection Web Application built using:
 
 ## Developer
 
-Kavidarshini
+Kavidarshini R S

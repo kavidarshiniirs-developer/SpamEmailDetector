@@ -14,7 +14,7 @@ from sklearn.metrics import accuracy_score, classification_report
 data=pd.read_csv("dataset/spam.csv",encoding="latin-1")
 
 #prints first 5 records from the file
-'''print(data.head())'''
+print(data.head())
 
 #Removing the unwanted columns
 data=data[['v1','v2']]
@@ -22,15 +22,15 @@ data=data[['v1','v2']]
 #Instead of leaving v1 and v2 i changed the name of columns
 data.columns=['label','message']
 
-'''print("\nCleaned Dataset:")
-print(data.head())'''
+print("\nCleaned Dataset:")
+print(data.head())
 
 #Data preprocessing-->Machine learning algorithms cannot understand words
 # so we convert--> ham  → 0 and spam → 1
 #This process is called LABEL ENCODING
 data['label']=data['label'].map({'ham':0,'spam':1})
-'''print("\nConverted Data:")
-print(data.head())'''
+print("\nConverted Data:")
+print(data.head())
 
 #Machine learning models work better if the text is cleaned first.
 #So we convert text to lower case and remove all the punctuations.
@@ -41,8 +41,8 @@ def clean_text(text):
     return text
 data['message']=data['message'].apply(clean_text)
 
-'''print("\nCleaned Messages")
-print(data.head())'''
+print("\nCleaned Messages")
+print(data.head())
 
 # Convert text into numerical features using TF-IDF
 
@@ -51,8 +51,8 @@ print(data.head())'''
 vectorizer=TfidfVectorizer()
 X=vectorizer.fit_transform(data['message'])
 y=data['label']
-'''print("\nShape of TF-IDF Matrix:")
-print(X.shape)'''
+print("\nShape of TF-IDF Matrix:")
+print(X.shape)
 
 #Spliting the dataset into training and testing data
 #test_size-->percentage of test data 

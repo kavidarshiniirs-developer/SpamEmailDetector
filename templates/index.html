@@ -2,10 +2,14 @@
 <html>
 <head>
     <title>Spam Email Detector</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
+    <div class="container">
     <h1>Spam Email Detector</h1>
+    <p>Paste your email or SMS below to check whether it is Spam or Not Spam.</p>
 
     <form action="/predict" method="POST">
 
@@ -24,10 +28,28 @@
         <br><br>
 
 {% if prediction %}
-    <h2>Prediction: {{ prediction }}</h2>
+
+    {% if prediction == "Spam" %}
+
+        <h2 class="spam">🚨 Prediction: Spam</h2>
+
+        <h3 class="category">
+            Category: {{ category }}
+        </h3>
+
+    {% elif prediction == "Not Spam" %}
+
+        <h2 class="ham">✅ Prediction: Not Spam</h2>
+
+    {% else %}
+
+        <h2 class="warning">{{ prediction }}</h2>
+
+    {% endif %}
+
 {% endif %}
 
     </form>
-
+</div>
 </body>
 </html>

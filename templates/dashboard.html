@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Spam Email Detector</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+
+    <h2>🛡 Spam Detector</h2>
+
+    <a href="/dashboard"><i class="fa-solid fa-house"></i> Dashboard</a>
+
+    <a href="/detect"><i class="fa-solid fa-envelope"></i> Scan Email</a>
+
+    <a href="/history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+
+    <a href="/profile"><i class="fa-solid fa-user"></i> Profile</a>
+
+    <a href="/settings"><i class="fa-solid fa-gear"></i> Settings</a>
+
+    <a href="/"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+
+</div>
+
+<div class="main">
+
+    <h1>Welcome to Dashboard 👋</h1>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Total Scans</h3>
+            <h2>{{ total }}</h2>
+        </div>
+
+        <div class="card">
+            <h3>Spam Detected</h3>
+            <h2>{{ spam }}</h2>
+        </div>
+
+        <div class="card">
+            <h3>Safe Emails</h3>
+            <h2>{{ safe }}</h2>
+        </div>
+
+        <div class="card">
+            <h3>Banking Scams</h3>
+            <h2>{{ banking }}</h2>
+        </div>
+
+    </div>
+
+    <div class="charts">
+
+    <div class="chart-box">
+        <h2>Spam vs Not Spam</h2>
+        <canvas id="pieChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+        <h2>Spam Categories</h2>
+        <canvas id="barChart"></canvas>
+    </div>
+
+</div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const pie = new Chart(document.getElementById("pieChart"), {
+
+    type: "pie",
+
+    data: {
+        labels: ["Spam", "Not Spam"],
+        datasets: [{
+            data: [{{ spam }}, {{ safe }}]
+        }]
+    }
+
+});
+
+const bar = new Chart(document.getElementById("barChart"), {
+
+    type: "bar",
+
+    data: {
+
+        labels: [
+            "Banking",
+            "Lottery",
+            "Phishing",
+            "Invoice",
+            "Crypto"
+        ],
+
+        datasets: [{
+            label: "Spam Messages",
+            data: {{ category_counts|tojson }}
+        }]
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
+
+
+
+</body>
+</html>

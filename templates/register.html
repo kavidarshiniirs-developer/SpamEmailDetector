@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Spam Email Detector</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Left Section -->
+    <div class="left-panel">
+
+        <h1>Spam Email Detector</h1>
+
+        <p>
+            Detect phishing, banking scams,
+            fake invoices and spam emails using
+            Machine Learning.
+        </p>
+
+    </div>
+
+
+    <!-- Right Section -->
+    <div class="login-card">
+
+        <h2>Create Account</h2>
+
+        <p>Create your account to continue</p>
+
+        <form action="/register" method="POST">
+
+    <div class="input-box">
+        <i class="fa-solid fa-user"></i>
+        <input
+            type="text"
+            name="fullname"
+            placeholder="Full Name"
+            required>
+    </div>
+
+    <div class="input-box">
+        <i class="fa-solid fa-envelope"></i>
+        <input
+            type="email"
+            name="email"
+            placeholder="Email Address"
+            required>
+    </div>
+
+    <div class="input-box">
+        <i class="fa-solid fa-lock"></i>
+        <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required>
+    </div>
+
+    <div class="input-box">
+        <i class="fa-solid fa-lock"></i>
+        <input
+            type="password"
+            name="confirm_password"
+            placeholder="Confirm Password"
+            required>
+    </div>
+
+    <button type="submit">
+        Register
+    </button>
+
+</form>
+
+        <p class="register">
+
+    Already have an account?
+<a href="{{ url_for('login') }}">Login</a>
+
+</p>
+
+    </div>
+
+</div>
+
+</body>
+</html>

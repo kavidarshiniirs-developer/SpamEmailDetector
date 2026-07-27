@@ -1,0 +1,90 @@
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Main Card */
+.container {
+    background: white;
+    width: 500px;
+    max-width: 90%;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0px 8px 20px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+/* Heading */
+h1 {
+    color: #333;
+}
+
+/* Text Area */
+textarea {
+    width: 90%;
+    height: 180px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #ccc;
+    resize: none;
+    font-size: 16px;
+    display: block;
+    margin: 20px auto;
+    box-sizing: border-box;
+}
+
+/* Button */
+button{
+    background:#007BFF;
+    color:white;
+    border:none;
+    padding:14px 30px;
+    font-size:17px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#0056b3;
+    transform:scale(1.05);
+}
+
+/* Prediction */
+h2 {
+    margin-top: 20px;
+    color: green;
+}
+p{
+    color:#666;
+    margin-bottom:20px;
+}
+.spam{
+    color:red;
+    font-weight:bold;
+}
+
+.ham{
+    color:green;
+    font-weight:bold;
+}
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.warning{
+    color: orange;
+    font-weight: bold;
+}
+.category{
+    color:#007BFF;
+    font-size:22px;
+    margin-top:10px;
+    font-weight:bold;
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scan History</title>
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='css/history.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📜 Scan History</h1>
+
+<table>
+
+<tr>
+
+<th>ID</th>
+<th>Message</th>
+<th>Prediction</th>
+<th>Category</th>
+<th>Date</th>
+
+</tr>
+
+{% for row in history %}
+
+<tr>
+
+<td>{{ row[0] }}</td>
+
+<td>{{ row[2] }}</td>
+
+<td>
+
+{% if row[3]=="Spam" %}
+<span class="spam">🚨 Spam</span>
+{% else %}
+<span class="safe">✅ Not Spam</span>
+{% endif %}
+
+</td>
+
+<td>{{ row[4] }}</td>
+
+<td>{{ row[5] }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+</body>
+</html>

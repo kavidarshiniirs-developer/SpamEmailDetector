@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | Spam Email Detector</title>
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 
@@ -16,69 +17,134 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="popup {{ category }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+<div class="grid-bg"></div>
 
 <div class="container">
 
-    <!-- Left Section -->
     <div class="left-panel">
 
-        <h1>Spam Email Detector</h1>
+<h1>
 
-        <p>
-            Detect phishing, banking scams,
-            fake invoices and spam emails using
-            Machine Learning.
-        </p>
+🛡 SpamShield AI
 
-    </div>
+</h1>
 
+<p>
 
-    <!-- Right Section -->
-    <div class="login-card">
+Protect yourself from phishing attacks,
+banking fraud, fake invoices,
+lottery scams and crypto fraud
+using Artificial Intelligence.
 
-        <h2>Welcome Back</h2>
+</p>
 
-        <p>Login to continue</p>
+<div class="feature">
+
+<i class="fa-solid fa-shield-halved"></i>
+
+<span>AI Powered Spam Detection</span>
+
+</div>
+
+<div class="feature">
+
+<i class="fa-solid fa-envelope-circle-check"></i>
+
+<span>Detects Phishing Emails</span>
+
+</div>
+
+<div class="feature">
+
+<i class="fa-solid fa-lock"></i>
+
+<span>Secure User Authentication</span>
+
+</div>
+
+</div>
+
+    <div class="login-card glass">
+
+        <h1>🛡 SpamShield AI</h1>
+        <p class="tagline">Machine Learning Powered Email Security    Secure Login</p>
 
         <form action="/login" method="POST">
 
             <div class="input-box">
-                <i class="fa-solid fa-envelope"></i>
+
+                <label>Email</label>
 
                 <input
-                type="email"
-    name="email"
-    placeholder="Email Address"
-    required>
+                    type="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    required>
+
             </div>
 
             <div class="input-box">
-                <i class="fa-solid fa-lock"></i>
+
+                <label>Password</label>
 
                 <input
-                type="password"
-    name="password"
-    placeholder="Password"
-    required>
+                    type="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    required>
+
             </div>
 
             <button type="submit">
+
                 Login
+
             </button>
 
         </form>
 
         <p class="register">
 
-    Don't have an account?
+            Don't have an account?
 
-    <a href="{{ url_for('register') }}">Register</a>
+            <a href="{{ url_for('register') }}">
 
-</p>
+                Register
+
+            </a>
+
+        </p>
 
     </div>
 
 </div>
+<script>
 
+setTimeout(function(){
+
+    const popup=document.querySelector(".popup");
+
+    if(popup){
+
+        popup.style.display="none";
+
+    }
+
+},3000);
+
+</script>
 </body>
 </html>

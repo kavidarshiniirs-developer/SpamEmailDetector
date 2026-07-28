@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+
     <title>Scan History</title>
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
     <link rel="stylesheet"
     href="{{ url_for('static', filename='css/history.css') }}">
 
@@ -12,9 +14,29 @@
 
 <div class="container">
 
-<h1>📜 Scan History</h1>
+<h1>
+📜 Scan History
+</h1>
 
-<table>
+<p class="subtitle">
+View all scanned emails and their predictions.
+</p>
+
+<div class="top">
+
+<input
+type="text"
+id="search"
+placeholder="🔍 Search message..."
+onkeyup="searchTable()">
+
+<a href="/clear_history" class="clear-btn">
+🗑 Clear All
+</a>
+
+</div>
+
+<table id="historyTable">
 
 <tr>
 
@@ -23,6 +45,7 @@
 <th>Prediction</th>
 <th>Category</th>
 <th>Date</th>
+<th>Action</th>
 
 </tr>
 
@@ -37,9 +60,17 @@
 <td>
 
 {% if row[3]=="Spam" %}
-<span class="spam">🚨 Spam</span>
+
+<span class="spam">
+🚨 Spam
+</span>
+
 {% else %}
-<span class="safe">✅ Not Spam</span>
+
+<span class="safe">
+✅ Not Spam
+</span>
+
 {% endif %}
 
 </td>
@@ -47,6 +78,17 @@
 <td>{{ row[4] }}</td>
 
 <td>{{ row[5] }}</td>
+
+<td>
+
+<a href="/delete_history/{{ row[0] }}"
+class="delete-btn">
+
+🗑 Delete
+
+</a>
+
+</td>
 
 </tr>
 
@@ -56,5 +98,44 @@
 
 </div>
 
+<script>
+
+function searchTable(){
+
+let input=document.getElementById("search");
+
+let filter=input.value.toUpperCase();
+
+let table=document.getElementById("historyTable");
+
+let tr=table.getElementsByTagName("tr");
+
+for(let i=1;i<tr.length;i++){
+
+let td=tr[i].getElementsByTagName("td")[1];
+
+if(td){
+
+let txt=td.textContent||td.innerText;
+
+if(txt.toUpperCase().indexOf(filter)>-1){
+
+tr[i].style.display="";
+
+}else{
+
+tr[i].style.display="none";
+
+}
+
+}
+
+}
+
+}
+
+</script>
+
 </body>
+
 </html>

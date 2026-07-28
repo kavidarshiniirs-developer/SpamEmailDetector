@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>K-Means Clustering</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/history.css') }}">
+
+</head>
+
+<body>
+    <button class="menu-btn" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+</button>
+
+<div class="container">
+
+<h1>🤖 Spam Message Clusters</h1>
+
+<table>
+
+<tr>
+    <th>Cluster</th>
+    <th>Message</th>
+</tr>
+
+{% for item in clusters %}
+
+<tr>
+
+<td>Cluster {{ item.cluster }}</td>
+
+<td>{{ item.message }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+</body>
+
+</html>

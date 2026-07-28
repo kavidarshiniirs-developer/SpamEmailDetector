@@ -1,9 +1,12 @@
-from flask import Flask,render_template,request,redirect, url_for
+from flask import Flask,render_template,request,redirect, url_for,flash
 import joblib
 import sqlite3
 import bcrypt
+from sklearn.cluster import KMeans
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 app=Flask(__name__)
+app.secret_key = "spam_detector_secret_key"
 
 model=joblib.load("model/spam_model.pkl")
 vectorizer=joblib.load("model/vectorizer.pkl")
@@ -96,7 +99,8 @@ def login_user():
 
     # Check if email exists
     if user is None:
-        return "User not found!"
+        flash("Email does not exist!", "error")
+        return redirect(url_for("login"))
 
     # Verify password
     stored_password = user[3]
@@ -104,11 +108,13 @@ def login_user():
     if bcrypt.checkpw(password.encode("utf-8"),
                       stored_password.encode("utf-8")):
 
+        flash("Login Successful!", "success")
         return redirect(url_for("dashboard"))
     
 
     else:
-        return "Incorrect Password!"
+        flash("Incorrect Password!", "error")
+        return redirect(url_for("login"))
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -122,7 +128,8 @@ def register():
 
         # Check if passwords match
         if password != confirm_password:
-            return "Passwords do not match!"
+            flash("❌ Passwords do not match!","error")
+            return redirect(url_for("register"))
 
         # Hash the password
         hashed_password = bcrypt.hashpw(
@@ -151,11 +158,13 @@ def register():
 
         except sqlite3.IntegrityError:
             conn.close()
-            return "Email already exists!"
+            flash("❌ Email already exists!","error")
+            return redirect(url_for("register"))
 
         conn.close()
 
-        return "Registration Successful!"
+        flash("✅ Registration Successful! Please login.","success")
+        return redirect(url_for("login"))
 
     return render_template("register.html")
 
@@ -281,6 +290,90 @@ def history():
     return render_template(
         "history.html",
         history=rows
+    )
+
+@app.route("/delete_history/<int:id>")
+def delete_history(id):
+
+    conn = sqlite3.connect("spam.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM scan_history WHERE id=?",
+        (id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    flash("🗑 Record deleted successfully!", "success")
+
+    return redirect(url_for("history"))
+
+@app.route("/clear_history")
+def clear_history():
+
+    conn = sqlite3.connect("spam.db")
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM scan_history")
+
+    conn.commit()
+    conn.close()
+
+    flash("All history cleared!", "success")
+
+    return redirect(url_for("history"))
+
+@app.route("/clustering")
+def clustering():
+
+    conn = sqlite3.connect("spam.db")
+    cursor = conn.cursor()
+
+    # Get only spam messages
+    cursor.execute("""
+        SELECT message
+        FROM scan_history
+        WHERE prediction='Spam'
+    """)
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    messages = [row[0] for row in rows]
+
+    if len(messages) < 2:
+        return render_template(
+            "clustering.html",
+            clusters=[]
+        )
+
+    # Convert messages into TF-IDF vectors
+    vectorizer = TfidfVectorizer(stop_words="english")
+    X = vectorizer.fit_transform(messages)
+
+    # Apply K-Means
+    kmeans = KMeans(
+        n_clusters=3,
+        random_state=42,
+        n_init=10
+    )
+
+    labels = kmeans.fit_predict(X)
+
+    results = []
+
+    for i in range(len(messages)):
+        results.append({
+            "message": messages[i],
+            "cluster": int(labels[i])
+        })
+
+    return render_template(
+        "clustering.html",
+        clusters=results
     )
 
 if __name__ == "__main__":

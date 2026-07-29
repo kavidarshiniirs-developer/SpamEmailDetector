@@ -1,140 +1,309 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Scan History</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
     <link rel="stylesheet"
-    href="{{ url_for('static', filename='css/history.css') }}">
+        href="{{ url_for('static', filename='css/common.css') }}">
+
+    <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/history.css') }}">
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 </head>
 
 <body>
 
-<div class="container">
+    <!-- ================= SIDEBAR ================= -->
 
-<h1>
-📜 Scan History
-</h1>
+    <div class="sidebar hide" id="sidebar">
 
-<p class="subtitle">
-View all scanned emails and their predictions.
-</p>
+        <h2>🛡 Spam Detector</h2>
 
-<div class="top">
+        <a href="/dashboard">
+            <i class="fa-solid fa-house"></i>
+            Dashboard
+        </a>
 
-<input
-type="text"
-id="search"
-placeholder="🔍 Search message..."
-onkeyup="searchTable()">
+        <a href="/detect">
+            <i class="fa-solid fa-envelope"></i>
+            Scan Email
+        </a>
 
-<a href="/clear_history" class="clear-btn">
-🗑 Clear All
-</a>
+        <a href="/history" class="active">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            History
+        </a>
 
-</div>
+        <a href="/clustering">
+            <i class="fa-solid fa-layer-group"></i>
+            Clustering
+        </a>
 
-<table id="historyTable">
+        <a href="/profile">
+            <i class="fa-solid fa-user"></i>
+            Profile
+        </a>
 
-<tr>
+        <a href="/settings">
+            <i class="fa-solid fa-gear"></i>
+            Settings
+        </a>
 
-<th>ID</th>
-<th>Message</th>
-<th>Prediction</th>
-<th>Category</th>
-<th>Date</th>
-<th>Action</th>
+        <a href="/">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Logout
+        </a>
 
-</tr>
+    </div>
 
-{% for row in history %}
+    <!-- ================= MAIN ================= -->
 
-<tr>
+    <div class="main full">
 
-<td>{{ row[0] }}</td>
+        <!-- Top Bar -->
 
-<td>{{ row[2] }}</td>
+        <div class="topbar">
 
-<td>
+            <button class="menu-btn"
+                id="menuBtn"
+                onclick="toggleSidebar()">
 
-{% if row[3]=="Spam" %}
+                <i class="fa-solid fa-bars"></i>
 
-<span class="spam">
-🚨 Spam
-</span>
+            </button>
 
-{% else %}
+            <h1>
 
-<span class="safe">
-✅ Not Spam
-</span>
+                <i class="fa-solid fa-clock-rotate-left"></i>
 
-{% endif %}
+                Scan History
 
-</td>
+            </h1>
 
-<td>{{ row[4] }}</td>
+        </div>
 
-<td>{{ row[5] }}</td>
+        <!-- Search Card -->
 
-<td>
+        <div class="glass-card">
 
-<a href="/delete_history/{{ row[0] }}"
-class="delete-btn">
+            <div class="toolbar">
 
-🗑 Delete
+                <div class="search-box">
 
-</a>
+                    <i class="fa-solid fa-magnifying-glass"></i>
 
-</td>
+                    <input
+                        type="text"
+                        id="search"
+                        placeholder="Search scanned emails..."
+                        onkeyup="searchTable()">
 
-</tr>
+                </div>
 
-{% endfor %}
+                <a href="/clear_history"
+                    class="clear-btn">
 
-</table>
+                    <i class="fa-solid fa-trash"></i>
 
-</div>
+                    Clear History
 
-<script>
+                </a>
 
-function searchTable(){
+            </div>
 
-let input=document.getElementById("search");
+        </div>
 
-let filter=input.value.toUpperCase();
+        <!-- History Table -->
 
-let table=document.getElementById("historyTable");
+        <div class="glass-card">
 
-let tr=table.getElementsByTagName("tr");
+            <table id="historyTable">
 
-for(let i=1;i<tr.length;i++){
+                <thead>
 
-let td=tr[i].getElementsByTagName("td")[1];
+                    <tr>
 
-if(td){
+                        <th>ID</th>
 
-let txt=td.textContent||td.innerText;
+                        <th>Email Message</th>
 
-if(txt.toUpperCase().indexOf(filter)>-1){
+                        <th>Status</th>
 
-tr[i].style.display="";
+                        <th>Category</th>
 
-}else{
+                        <th>Date</th>
 
-tr[i].style.display="none";
+                        <th>Action</th>
 
-}
+                    </tr>
 
-}
+                </thead>
 
-}
+                <tbody>
 
-}
+                    {% if history %}
 
-</script>
+                    {% for row in history %}
+
+                    <tr>
+
+                        <td>
+
+                            #{{ row[0] }}
+
+                        </td>
+
+                        <td class="message">
+
+                            {{ row[2] }}
+
+                        </td>
+
+                        <td>
+
+                            {% if row[3]=="Spam" %}
+
+                            <span class="spam">
+
+                                🚨 Spam
+
+                            </span>
+
+                            {% else %}
+
+                            <span class="safe">
+
+                                ✅ Safe
+
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if row[4] %}
+
+                            <span class="category">
+
+                                {{ row[4] }}
+
+                            </span>
+
+                            {% else %}
+
+                            <span class="category">
+
+                                Safe Email
+
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {{ row[5] }}
+
+                        </td>
+
+                        <td>
+
+                            <a href="/delete_history/{{ row[0] }}"
+                                class="delete-btn">
+
+                                <i class="fa-solid fa-trash"></i>
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                    {% else %}
+
+                    <tr>
+
+                        <td colspan="6">
+
+                            <div class="empty-history">
+
+                                <i class="fa-solid fa-clock-rotate-left fa-3x"></i>
+
+                                <h2>
+
+                                    No Scan History
+
+                                </h2>
+
+                                <p>
+
+                                    Scan an email to view your history here.
+
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endif %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        function searchTable() {
+
+            let input = document.getElementById("search");
+
+            let filter = input.value.toUpperCase();
+
+            let table = document.getElementById("historyTable");
+
+            let tr = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < tr.length; i++) {
+
+                let td = tr[i].getElementsByTagName("td")[1];
+
+                if (td) {
+
+                    let txt = td.textContent || td.innerText;
+
+                    tr[i].style.display =
+                        txt.toUpperCase().indexOf(filter) > -1
+                            ? ""
+                            : "none";
+
+                }
+
+            }
+
+        }
+
+    </script>
+
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 
 </body>
 

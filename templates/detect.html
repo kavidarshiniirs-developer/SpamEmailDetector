@@ -1,54 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scan Email</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+    <title>Email Threat Analyzer</title>
+
     <link rel="stylesheet"
-    href="{{ url_for('static', filename='css/detect.css') }}">
+        href="{{ url_for('static', filename='css/common.css') }}">
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/detect.css') }}">
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 </head>
+
 <body>
 
-<div class="container">
+    <!-- Sidebar -->
 
-    <h1>📧 Scan Email or SMS</h1>
+    <div class="sidebar hide" id="sidebar">
 
-    <form action="/predict" method="POST">
+        <h2>🛡 Spam Detector</h2>
 
-        <textarea
-            name="message"
-            rows="12"
-            placeholder="Paste your Email or SMS here..."
-            required></textarea>
+        <a href="/dashboard">
+            <i class="fa-solid fa-house"></i> Dashboard
+        </a>
 
-        <br><br>
+        <a href="/detect" class="active">
+            <i class="fa-solid fa-envelope"></i> Scan Email
+        </a>
 
-        <button type="submit">
+        <a href="/history">
+            <i class="fa-solid fa-clock"></i> History
+        </a>
 
-            Detect Spam
+        <a href="/clustering">
+            <i class="fa-solid fa-layer-group"></i> Clustering
+        </a>
 
-        </button>
+        <a href="/profile">
+            <i class="fa-solid fa-user"></i> Profile
+        </a>
 
-    </form>
+        <a href="/settings">
+            <i class="fa-solid fa-gear"></i> Settings
+        </a>
 
-    {% if prediction %}
+        <a href="/">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
 
-        <h2>{{ prediction }}</h2>
+    </div>
 
-    {% endif %}
+    <!-- Main -->
 
-    {% if category %}
+    <div class="main full" id="main">
 
-        <h3>{{ category }}</h3>
+        <!-- Top -->
 
-    {% endif %}
+        <div class="topbar">
 
-</div>
+            <button class="menu-btn" onclick="toggleSidebar()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <h1>Email Threat Analyzer</h1>
+
+        </div>
+
+        <!-- Scan Card -->
+
+        <div class="glass-card">
+
+            <h2>
+                <i class="fa-solid fa-envelope-open-text"></i>
+                Paste Email
+            </h2>
+
+            <form action="/predict" method="POST">
+
+                <textarea
+                    name="message"
+                    placeholder="Paste your email here..."
+                    required>{{ request.form.get('message','') }}</textarea>
+
+                <button type="submit">
+
+                    <i class="fa-solid fa-shield-halved"></i>
+
+                    Analyze Email
+
+                </button>
+
+            </form>
+
+        </div>
+
+        {% if prediction %}
+
+        <!-- Threat Report -->
+
+        <div class="threat-card">
+
+            <h2>
+
+                <i class="fa-solid fa-shield-virus"></i>
+
+                Threat Analysis Report
+
+            </h2>
+
+            {% if prediction=="Spam" %}
+
+            <div class="status danger">
+
+                🚨 SPAM DETECTED
+
+            </div>
+
+            {% else %}
+
+            <div class="status safe">
+
+                ✅ SAFE EMAIL
+
+            </div>
+
+            {% endif %}
+
+            <div class="analysis-grid">
+
+                <div class="analysis-box">
+
+                    <h4>Category</h4>
+
+                    <p>
+
+                        {{ category if category else "Safe Email" }}
+
+                    </p>
+
+                </div>
+
+                <div class="analysis-box">
+
+                    <h4>Confidence</h4>
+
+                    <h3>{{ confidence }}%</h3>
+
+                    <div class="progress">
+
+                        <div class="progress-fill"
+                            style="width:{{ confidence }}%">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Recommendation -->
+
+        <div class="recommend-card">
+
+            <h2>
+
+                <i class="fa-solid fa-triangle-exclamation"></i>
+
+                Security Recommendation
+
+            </h2>
+
+            {% if prediction=="Spam" %}
+
+            <ul>
+
+                <li>🚫 Avoid clicking suspicious links.</li>
+
+                <li>🔒 Never share passwords or OTPs.</li>
+
+                <li>🗑 Delete the email immediately.</li>
+
+                <li>🚷 Block the sender.</li>
+
+            </ul>
+
+            {% else %}
+
+            <ul>
+
+                <li>✅ Email appears safe.</li>
+
+                <li>✅ Verify attachments before opening.</li>
+
+                <li>✅ Continue with normal caution.</li>
+
+            </ul>
+
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 
 </body>
+
 </html>

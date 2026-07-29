@@ -1,9 +1,10 @@
-from flask import Flask,render_template,request,redirect, url_for,flash
+from flask import Flask,render_template,request,redirect, url_for,flash,session
 import joblib
 import sqlite3
 import bcrypt
 from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import PCA
 
 app=Flask(__name__)
 app.secret_key = "spam_detector_secret_key"
@@ -108,7 +109,9 @@ def login_user():
     if bcrypt.checkpw(password.encode("utf-8"),
                       stored_password.encode("utf-8")):
 
+        session["user_email"] = email
         flash("Login Successful!", "success")
+        
         return redirect(url_for("dashboard"))
     
 
@@ -223,6 +226,14 @@ def predict():
     print(f"Message received: '{message}'")
     message = message.strip()
 
+    message_vector = vectorizer.transform([message])
+    prediction = model.predict(message_vector)
+
+# Prediction probability
+    probability = model.predict_proba(message_vector)
+
+    confidence = round(max(probability[0]) * 100, 2)
+
     if message == "":
         return render_template(
             "detect.html",
@@ -241,11 +252,21 @@ def predict():
     else:
         # Otherwise use the ML model
         message_vector = vectorizer.transform([message])
+
         prediction = model.predict(message_vector)
+
+# Get prediction probabilities
+        probability = model.predict_proba(message_vector)
+
+# Calculate confidence percentage
+        confidence = round(max(probability[0]) * 100, 2)
 
         if prediction[0] == 1:
             result = "Spam"
-            category = "⚠ General Spam"
+
+            if category == "⚠ General Spam":
+                category = "⚠ General Spam"
+
         else:
             result = "Not Spam"
             category = ""
@@ -270,10 +291,11 @@ def predict():
     conn.close()
 
     return render_template(
-        "detect.html",
-        prediction=result,
-        category=category
-    )
+    "detect.html",
+    prediction=result,
+    category=category,
+    confidence=confidence
+)
 
 @app.route("/history")
 def history():
@@ -331,7 +353,6 @@ def clustering():
     conn = sqlite3.connect("spam.db")
     cursor = conn.cursor()
 
-    # Get only spam messages
     cursor.execute("""
         SELECT message
         FROM scan_history
@@ -347,14 +368,15 @@ def clustering():
     if len(messages) < 2:
         return render_template(
             "clustering.html",
-            clusters=[]
+            clusters=[],
+            cluster_counts=[0,0,0]
         )
 
-    # Convert messages into TF-IDF vectors
+    # TF-IDF
     vectorizer = TfidfVectorizer(stop_words="english")
     X = vectorizer.fit_transform(messages)
 
-    # Apply K-Means
+    # K-Means
     kmeans = KMeans(
         n_clusters=3,
         random_state=42,
@@ -363,18 +385,187 @@ def clustering():
 
     labels = kmeans.fit_predict(X)
 
+    # Reduce dimensions for scatter plot
+    pca = PCA(n_components=2)
+    points = pca.fit_transform(X.toarray())
+
     results = []
 
+    cluster_counts = [0,0,0]
+
     for i in range(len(messages)):
+
+        cluster_counts[labels[i]] += 1
+
         results.append({
+
             "message": messages[i],
-            "cluster": int(labels[i])
+
+            "cluster": int(labels[i]),
+
+            "x": float(points[i][0]),
+
+            "y": float(points[i][1])
+
         })
 
     return render_template(
+
         "clustering.html",
-        clusters=results
+
+        clusters=results,
+
+        cluster_counts=cluster_counts
+
     )
+
+@app.route("/profile")
+def profile():
+
+    if "user_email" not in session:
+        return redirect(url_for("login"))
+
+    conn = sqlite3.connect("spam.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT fullname, email
+        FROM users
+        WHERE email=?
+    """, (session["user_email"],))
+
+    user = cursor.fetchone()
+
+    cursor.execute("SELECT COUNT(*) FROM scan_history")
+    total = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM scan_history
+        WHERE prediction='Spam'
+    """)
+    spam = cursor.fetchone()[0]
+
+    conn.close()
+
+    return render_template(
+        "profile.html",
+        fullname=user[0],
+        email=user[1],
+        total=total,
+        spam=spam
+    )
+
+@app.route("/update_profile", methods=["POST"])
+def update_profile():
+
+    if "user_email" not in session:
+        return redirect(url_for("login"))
+
+    fullname = request.form["fullname"]
+    email = request.form["email"]
+
+    conn = sqlite3.connect("spam.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE users
+        SET fullname=?, email=?
+        WHERE email=?
+    """, (
+        fullname,
+        email,
+        session["user_email"]
+    ))
+
+    conn.commit()
+    conn.close()
+
+    # Update the session if the email changed
+    session["user_email"] = email
+
+    flash("Profile updated successfully!", "success")
+
+    return redirect(url_for("profile"))
+
+@app.route("/change_password", methods=["GET", "POST"])
+def change_password():
+
+    if "user_email" not in session:
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+
+        current_password = request.form["current_password"]
+        new_password = request.form["new_password"]
+        confirm_password = request.form["confirm_password"]
+
+        if new_password != confirm_password:
+            flash("New passwords do not match!", "error")
+            return redirect(url_for("change_password"))
+
+        conn = sqlite3.connect("spam.db")
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT password FROM users WHERE email=?",
+            (session["user_email"],)
+        )
+
+        user = cursor.fetchone()
+
+        if user is None:
+            conn.close()
+            flash("User not found!", "error")
+            return redirect(url_for("change_password"))
+
+        stored_password = user[0]
+
+        if not bcrypt.checkpw(
+            current_password.encode("utf-8"),
+            stored_password.encode("utf-8")
+        ):
+            conn.close()
+            flash("Current password is incorrect!", "error")
+            return redirect(url_for("change_password"))
+
+        hashed_password = bcrypt.hashpw(
+            new_password.encode("utf-8"),
+            bcrypt.gensalt()
+        ).decode("utf-8")
+
+        cursor.execute(
+            """
+            UPDATE users
+            SET password=?
+            WHERE email=?
+            """,
+            (
+                hashed_password,
+                session["user_email"]
+            )
+        )
+
+        conn.commit()
+        conn.close()
+
+        flash("Password changed successfully!", "success")
+
+        return redirect(url_for("profile"))
+
+    return render_template("change_password.html")
+
+@app.route("/settings")
+def settings():
+    return render_template("settings.html")
+
+@app.route("/logout")
+def logout():
+
+    session.clear()
+
+    flash("Logged out successfully!", "success")
+    return redirect(url_for("login"))
 
 if __name__ == "__main__":
     app.run(debug=True)

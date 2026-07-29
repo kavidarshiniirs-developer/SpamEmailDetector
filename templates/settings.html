@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Settings</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/common.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/settings.css') }}">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="sidebar hide" id="sidebar">
+
+    <h2>🛡 Spam Detector</h2>
+
+    <a href="/dashboard">
+        <i class="fa-solid fa-house"></i>
+        Dashboard
+    </a>
+
+    <a href="/detect">
+        <i class="fa-solid fa-envelope"></i>
+        Scan Email
+    </a>
+
+    <a href="/history">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        History
+    </a>
+
+    <a href="/clustering">
+        <i class="fa-solid fa-layer-group"></i>
+        Clustering
+    </a>
+
+    <a href="/profile">
+        <i class="fa-solid fa-user"></i>
+        Profile
+    </a>
+
+    <a href="/settings" class="active">
+        <i class="fa-solid fa-gear"></i>
+        Settings
+    </a>
+
+    <a href="/logout">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        Logout
+    </a>
+
+</div>
+
+<div class="main full">
+
+    <div class="topbar">
+
+        <button class="menu-btn"
+                onclick="toggleSidebar()">
+
+            <i class="fa-solid fa-bars"></i>
+
+        </button>
+
+        <h1>Application Settings</h1>
+
+    </div>
+
+    <!-- APPLICATION -->
+
+    <div class="settings-card">
+
+        <h2>
+
+            <i class="fa-solid fa-sliders"></i>
+
+            Application
+
+        </h2>
+
+        <div class="setting-row">
+
+            <div>
+
+                <h3>Dark Mode</h3>
+
+                <p>Coming Soon</p>
+
+            </div>
+
+            <span class="coming">OFF</span>
+
+        </div>
+
+        <div class="setting-row">
+
+            <div>
+
+                <h3>Email Notifications</h3>
+
+                <p>Coming Soon</p>
+
+            </div>
+
+            <span class="coming">OFF</span>
+
+        </div>
+
+        <div class="setting-row">
+
+            <div>
+
+                <h3>Export Scan History</h3>
+
+                <p>Coming Soon</p>
+
+            </div>
+
+            <button class="disabled-btn">
+
+                Export
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- DATA -->
+
+    <div class="settings-card">
+
+        <h2>
+
+            <i class="fa-solid fa-database"></i>
+
+            Data Management
+
+        </h2>
+
+        <div class="setting-row">
+
+            <div>
+
+                <h3>Clear Scan History</h3>
+
+                <p>Delete all scan records.</p>
+
+            </div>
+
+            <a href="/clear_history"
+               class="danger-btn">
+
+                Clear
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- ACCOUNT -->
+
+    <div class="settings-card">
+
+        <h2>
+
+            <i class="fa-solid fa-user-gear"></i>
+
+            Account
+
+        </h2>
+
+        <div class="setting-row">
+
+            <div>
+
+                <h3>Logout</h3>
+
+                <p>Sign out from the application.</p>
+
+            </div>
+
+            <a href="/logout"
+               class="logout-btn">
+
+                Logout
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- ABOUT -->
+
+    <div class="settings-card">
+
+        <h2>
+
+            <i class="fa-solid fa-circle-info"></i>
+
+            About
+
+        </h2>
+
+        <table class="about-table">
+
+            <tr>
+
+                <td>Application</td>
+
+                <td>Spam Email Detector</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Version</td>
+
+                <td>1.0</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Spam Detection</td>
+
+                <td>Multinomial Naive Bayes</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Clustering</td>
+
+                <td>K-Means</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Developer</td>
+
+                <td>Kavidarshini</td>
+
+            </tr>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+
+</body>
+
+</html>

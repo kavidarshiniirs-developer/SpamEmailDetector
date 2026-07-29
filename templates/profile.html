@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Profile</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/common.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/profile.css') }}">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<!-- ================= Sidebar ================= -->
+
+<div class="sidebar hide" id="sidebar">
+
+    <h2>🛡 Spam Detector</h2>
+
+    <a href="/dashboard">
+        <i class="fa-solid fa-house"></i> Dashboard
+    </a>
+
+    <a href="/detect">
+        <i class="fa-solid fa-envelope"></i> Scan Email
+    </a>
+
+    <a href="/history">
+        <i class="fa-solid fa-clock-rotate-left"></i> History
+    </a>
+
+    <a href="/clustering">
+        <i class="fa-solid fa-layer-group"></i> Clustering
+    </a>
+
+    <a href="/profile" class="active">
+        <i class="fa-solid fa-user"></i> Profile
+    </a>
+
+    <a href="/settings">
+        <i class="fa-solid fa-gear"></i> Settings
+    </a>
+
+    <a href="/logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </a>
+
+</div>
+
+<!-- ================= Main ================= -->
+
+<div class="main full">
+
+    <!-- Topbar -->
+
+    <div class="topbar">
+
+        <button class="menu-btn" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <h1>My Profile</h1>
+
+    </div>
+
+    <!-- Profile Card -->
+
+    <div class="profile-card">
+
+        <div class="profile-header">
+
+            <div class="avatar">
+
+                <i class="fa-solid fa-user"></i>
+
+            </div>
+
+            <h2>{{ fullname }}</h2>
+
+            <p>Spam Detector User</p>
+
+        </div>
+
+        <!-- Statistics -->
+
+        <div class="stats">
+
+            <div class="stat-box">
+
+                <i class="fa-solid fa-chart-line"></i>
+
+                <h3>Total Scans</h3>
+
+                <h2>{{ total }}</h2>
+
+            </div>
+
+            <div class="stat-box">
+
+                <i class="fa-solid fa-bug"></i>
+
+                <h3>Spam Detected</h3>
+
+                <h2>{{ spam }}</h2>
+
+            </div>
+
+        </div>
+
+        <!-- Information -->
+
+        <div class="info-box">
+
+            <div class="info-row">
+
+                <i class="fa-solid fa-user"></i>
+
+                <div>
+
+                    <h4>Full Name</h4>
+
+                    <p>{{ fullname }}</p>
+
+                </div>
+
+            </div>
+
+            <div class="info-row">
+
+                <i class="fa-solid fa-envelope"></i>
+
+                <div>
+
+                    <h4>Email Address</h4>
+
+                    <p>{{ email }}</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Buttons -->
+
+        <div class="profile-buttons">
+
+            <button class="edit-btn" onclick="openEdit()">
+
+
+                <i class="fa-solid fa-pen"></i>
+
+                Edit Profile
+
+            </button>
+
+           <a href="/change_password" class="password-btn">
+    <i class="fa-solid fa-lock"></i>
+    Change Password
+</a>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- ================= Edit Profile Modal ================= -->
+
+<div class="modal" id="editModal">
+
+    <div class="modal-content">
+
+        <span class="close" onclick="closeEdit()">&times;</span>
+
+        <h2>
+            <i class="fa-solid fa-user-pen"></i>
+            Edit Profile
+        </h2>
+
+        <form action="/update_profile" method="POST">
+            <input
+    type="hidden"
+    name="old_email"
+    value="{{ email }}"
+>
+
+            <label>Full Name</label>
+
+            <input
+                type="text"
+                name="fullname"
+                value="{{ fullname }}"
+                required
+            >
+
+            <label>Email</label>
+
+            <input
+                type="email"
+                name="email"
+                value="{{ email }}"
+                required
+            >
+
+            <button type="submit">
+
+                <i class="fa-solid fa-floppy-disk"></i>
+
+                Save Changes
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+
+
+<script>
+
+function openEdit(){
+    document.getElementById("editModal").style.display = "flex";
+}
+
+function closeEdit(){
+    document.getElementById("editModal").style.display = "none";
+}
+
+window.onclick = function(event){
+    const modal = document.getElementById("editModal");
+    if(event.target == modal){
+        modal.style.display = "none";
+    }
+}
+
+</script>
+</body>
+</html>

@@ -1,47 +1,346 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>K-Means Clustering</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/history.css') }}">
+          href="{{ url_for('static', filename='css/common.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/clustering.css') }}">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 </head>
 
 <body>
-    <button class="menu-btn" onclick="toggleSidebar()">
-    <i class="fa-solid fa-bars"></i>
-</button>
 
-<div class="container">
+<div class="sidebar hide" id="sidebar">
 
-<h1>🤖 Spam Message Clusters</h1>
+    <h2>🛡 Spam Detector</h2>
 
-<table>
+    <a href="/dashboard">
+        <i class="fa-solid fa-house"></i> Dashboard
+    </a>
 
-<tr>
-    <th>Cluster</th>
-    <th>Message</th>
-</tr>
+    <a href="/detect">
+        <i class="fa-solid fa-envelope"></i> Scan Email
+    </a>
+
+    <a href="/history">
+        <i class="fa-solid fa-clock-rotate-left"></i> History
+    </a>
+
+    <a href="/clustering" class="active">
+        <i class="fa-solid fa-layer-group"></i> Clustering
+    </a>
+
+    <a href="/profile">
+        <i class="fa-solid fa-user"></i> Profile
+    </a>
+
+    <a href="/settings">
+        <i class="fa-solid fa-gear"></i> Settings
+    </a>
+
+    <a href="/">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </a>
+
+</div>
+
+<div class="main full">
+
+    <div class="topbar">
+
+        <button class="menu-btn" onclick="toggleSidebar()">
+
+            <i class="fa-solid fa-bars"></i>
+
+        </button>
+
+        <h1>K-Means Email Clustering</h1>
+
+    </div>
+
+    <!-- Cards -->
+
+    <div class="cards">
+
+        <div class="card">
+            <i class="fa-solid fa-layer-group"></i>
+            <h3>Total Clusters</h3>
+            <h2>3</h2>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-envelope"></i>
+            <h3>Spam Emails</h3>
+            <h2>{{ clusters|length }}</h2>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-brain"></i>
+            <h3>Algorithm</h3>
+            <h2>K-Means</h2>
+        </div>
+
+    </div>
+
+    <!-- Scatter Chart -->
+
+    <div class="glass-card">
+
+        <h2>
+
+            <i class="fa-solid fa-circle-nodes"></i>
+
+            Cluster Visualization
+
+        </h2>
+
+        <div class="chart-container">
+
+            <canvas id="clusterChart"></canvas>
+
+        </div>
+
+    </div>
+
+    <!-- Table -->
+
+    <div class="glass-card">
+
+        <h2>
+
+            <i class="fa-solid fa-table"></i>
+
+            Clustered Messages
+
+        </h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Cluster</th>
+
+                    <th>Email Message</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for item in clusters %}
+
+                <tr>
+
+                    <td>
+
+                        Cluster {{ item.cluster }}
+
+                    </td>
+
+                    <td>
+
+                        {{ item.message }}
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const cluster0 = [];
+const cluster1 = [];
+const cluster2 = [];
 
 {% for item in clusters %}
 
-<tr>
-
-<td>Cluster {{ item.cluster }}</td>
-
-<td>{{ item.message }}</td>
-
-</tr>
+{% if item.cluster == 0 %}
+cluster0.push({
+    x: {{ item.x }},
+    y: {{ item.y }}
+});
+{% elif item.cluster == 1 %}
+cluster1.push({
+    x: {{ item.x }},
+    y: {{ item.y }}
+});
+{% else %}
+cluster2.push({
+    x: {{ item.x }},
+    y: {{ item.y }}
+});
+{% endif %}
 
 {% endfor %}
 
-</table>
+new Chart(document.getElementById("clusterChart"),{
 
-</div>
+    type:"scatter",
+
+    data:{
+
+        datasets:[
+
+            {
+
+                label:"Cluster 0",
+
+                data:cluster0,
+
+                backgroundColor:"#38bdf8",
+
+                pointRadius:8,
+
+                pointHoverRadius:10
+
+            },
+
+            {
+
+                label:"Cluster 1",
+
+                data:cluster1,
+
+                backgroundColor:"#8b5cf6",
+
+                pointRadius:8,
+
+                pointHoverRadius:10
+
+            },
+
+            {
+
+                label:"Cluster 2",
+
+                data:cluster2,
+
+                backgroundColor:"#22c55e",
+
+                pointRadius:8,
+
+                pointHoverRadius:10
+
+            }
+
+        ]
+
+    },
+
+    options:{
+
+        responsive:true,
+
+        maintainAspectRatio:false,
+
+        plugins:{
+
+            legend:{
+
+                position:"bottom",
+
+                labels:{
+
+                    color:"white",
+
+                    font:{
+                        size:14
+                    }
+
+                }
+
+            }
+
+        },
+
+        scales:{
+
+            x:{
+
+                title:{
+
+                    display:true,
+
+                    text:"Component 1",
+
+                    color:"white"
+
+                },
+
+                ticks:{
+
+                    color:"white"
+
+                },
+
+                grid:{
+
+                    color:"rgba(255,255,255,.08)"
+
+                }
+
+            },
+
+            y:{
+
+                title:{
+
+                    display:true,
+
+                    text:"Component 2",
+
+                    color:"white"
+
+                },
+
+                ticks:{
+
+                    color:"white"
+
+                },
+
+                grid:{
+
+                    color:"rgba(255,255,255,.08)"
+
+                }
+
+            }
+
+        }
+
+    }
+
+});
+
+</script>
+
 <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
-</body>
 
+</body>
 </html>

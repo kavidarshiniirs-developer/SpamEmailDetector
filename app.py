@@ -109,7 +109,8 @@ def login_user():
     if bcrypt.checkpw(password.encode("utf-8"),
                       stored_password.encode("utf-8")):
 
-        session["user_email"] = email
+        session["user_email"] = user[2]      # Email
+        session["user_name"] = user[1]       
         flash("Login Successful!", "success")
         
         return redirect(url_for("dashboard"))
@@ -173,17 +174,33 @@ def register():
 
 @app.route("/dashboard")
 def dashboard():
+    user_email = session.get("user_email")
+
+    if not user_email:
+        return redirect(url_for("login"))
 
     conn = sqlite3.connect("spam.db")
     cursor = conn.cursor()
 
-    cursor.execute("SELECT COUNT(*) FROM scan_history")
+    cursor.execute(
+    "SELECT COUNT(*) FROM scan_history WHERE email=?",
+    (user_email,)
+)
+
     total = cursor.fetchone()[0]
 
-    cursor.execute("SELECT COUNT(*) FROM scan_history WHERE prediction='Spam'")
+    cursor.execute(
+    "SELECT COUNT(*) FROM scan_history WHERE email=? AND prediction='Spam'",
+    (user_email,)
+)
+
     spam = cursor.fetchone()[0]
 
-    cursor.execute("SELECT COUNT(*) FROM scan_history WHERE prediction='Not Spam'")
+    cursor.execute(
+    "SELECT COUNT(*) FROM scan_history WHERE email=? AND prediction='Not Spam'",
+    (user_email,)
+)
+
     safe = cursor.fetchone()[0]
 
     categories = [
@@ -197,11 +214,17 @@ def dashboard():
     counts = []
 
     for category in categories:
+
         cursor.execute(
-            "SELECT COUNT(*) FROM scan_history WHERE category=?",
-            (category,)
-        )
-        counts.append(cursor.fetchone()[0])
+        """
+        SELECT COUNT(*)
+        FROM scan_history
+        WHERE email=? AND category=?
+        """,
+        (user_email, category)
+    )
+
+    counts.append(cursor.fetchone()[0])
 
     conn.close()
 
@@ -275,13 +298,14 @@ def predict():
     conn = sqlite3.connect("spam.db")
     cursor = conn.cursor()
 
+    user_email = session.get("user_email")
     cursor.execute("""
         INSERT INTO scan_history
         (email, message, prediction, category)
         VALUES (?, ?, ?, ?)
         """,
     (
-        "Current User",   # We'll replace this with the logged-in user's email later
+        user_email,   
         message,
         result,
         category
@@ -300,10 +324,23 @@ def predict():
 @app.route("/history")
 def history():
 
+    user_email = session.get("user_email")
+
+    if not user_email:
+        return redirect(url_for("login"))
+
     conn = sqlite3.connect("spam.db")
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM scan_history")
+    cursor.execute(
+        """
+        SELECT *
+        FROM scan_history
+        WHERE email=?
+        ORDER BY id DESC
+        """,
+        (user_email,)
+    )
 
     rows = cursor.fetchall()
 
@@ -320,10 +357,15 @@ def delete_history(id):
     conn = sqlite3.connect("spam.db")
     cursor = conn.cursor()
 
+    user_email = session.get("user_email")
+
     cursor.execute(
-        "DELETE FROM scan_history WHERE id=?",
-        (id,)
-    )
+    """
+    DELETE FROM scan_history
+    WHERE id=? AND email=?
+    """,
+    (id, user_email)
+)
 
     conn.commit()
     conn.close()
@@ -338,7 +380,12 @@ def clear_history():
     conn = sqlite3.connect("spam.db")
     cursor = conn.cursor()
 
-    cursor.execute("DELETE FROM scan_history")
+    user_email = session.get("user_email")
+
+    cursor.execute(
+    "DELETE FROM scan_history WHERE email=?",
+    (user_email,)
+)
 
     conn.commit()
     conn.close()
@@ -350,14 +397,20 @@ def clear_history():
 @app.route("/clustering")
 def clustering():
 
+    user_email = session.get("user_email")
+
+    if not user_email:
+        return redirect(url_for("login"))
+
     conn = sqlite3.connect("spam.db")
     cursor = conn.cursor()
 
+    # Get only the logged-in user's spam messages
     cursor.execute("""
         SELECT message
         FROM scan_history
-        WHERE prediction='Spam'
-    """)
+        WHERE email=? AND prediction='Spam'
+    """, (user_email,))
 
     rows = cursor.fetchall()
 
@@ -365,18 +418,21 @@ def clustering():
 
     messages = [row[0] for row in rows]
 
+    # If there are fewer than 2 spam messages,
+    # clustering cannot be performed
     if len(messages) < 2:
         return render_template(
-            "clustering.html",
-            clusters=[],
-            cluster_counts=[0,0,0]
-        )
+        "clustering.html",
+        clusters=[],
+        cluster_counts=[0,0,0],
+        message="At least 2 spam emails are required for clustering."
+    )
 
-    # TF-IDF
-    vectorizer = TfidfVectorizer(stop_words="english")
-    X = vectorizer.fit_transform(messages)
+    # Convert messages into TF-IDF vectors
+    tfidf = TfidfVectorizer(stop_words="english")
+    X = tfidf.fit_transform(messages)
 
-    # K-Means
+    # Apply K-Means
     kmeans = KMeans(
         n_clusters=3,
         random_state=42,
@@ -385,38 +441,24 @@ def clustering():
 
     labels = kmeans.fit_predict(X)
 
-    # Reduce dimensions for scatter plot
-    pca = PCA(n_components=2)
-    points = pca.fit_transform(X.toarray())
-
     results = []
 
-    cluster_counts = [0,0,0]
-
     for i in range(len(messages)):
-
-        cluster_counts[labels[i]] += 1
-
         results.append({
-
             "message": messages[i],
-
-            "cluster": int(labels[i]),
-
-            "x": float(points[i][0]),
-
-            "y": float(points[i][1])
-
+            "cluster": int(labels[i])
         })
 
+    # Count messages in each cluster
+    cluster_counts = [0, 0, 0]
+
+    for label in labels:
+        cluster_counts[label] += 1
+
     return render_template(
-
         "clustering.html",
-
         clusters=results,
-
         cluster_counts=cluster_counts
-
     )
 
 @app.route("/profile")

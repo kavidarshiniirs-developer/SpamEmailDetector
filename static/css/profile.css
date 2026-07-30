@@ -603,3 +603,50 @@ body{
 
 }
 
+.password-btn:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:0 10px 25px rgba(37,99,235,.35);
+
+}
+/* =========================
+   MOBILE RESPONSIVE
+========================= */
+
+@media (max-width:768px){
+
+    .profile-card{
+
+        width:95%;
+
+        margin:20px auto;
+
+        padding:25px;
+
+    }
+
+    .stats{
+
+        flex-direction:column;
+
+        gap:20px;
+
+    }
+
+    .profile-buttons{
+
+        flex-direction:column;
+
+        gap:15px;
+
+    }
+
+    .edit-btn,
+    .password-btn{
+
+        width:100%;
+
+    }
+
+}

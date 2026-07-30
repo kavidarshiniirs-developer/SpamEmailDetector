@@ -105,7 +105,7 @@
 
         <!-- Threat Report -->
 
-        <div class="threat-card">
+        <div class="threat-card" id="result">
 
             <h2>
 
@@ -214,6 +214,27 @@
 
     </div>
 
+    <script>
+
+window.onload = function(){
+
+    const result = document.getElementById("result");
+
+    if(result){
+
+        result.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "start"
+
+        });
+
+    }
+
+};
+
+</script>
     <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 
 </body>

@@ -224,9 +224,11 @@ def dashboard():
         (user_email, category)
     )
 
-    counts.append(cursor.fetchone()[0])
+        counts.append(cursor.fetchone()[0])
 
     conn.close()
+    
+
 
     return render_template(
         "dashboard.html",
@@ -246,7 +248,7 @@ def detect():
 def predict():
 
     message = request.form['message']
-    print(f"Message received: '{message}'")
+    
     message = message.strip()
 
     message_vector = vectorizer.transform([message])
@@ -425,6 +427,7 @@ def clustering():
         "clustering.html",
         clusters=[],
         cluster_counts=[0,0,0],
+        chart_data=[],
         message="At least 2 spam emails are required for clustering."
     )
 
@@ -440,6 +443,20 @@ def clustering():
     )
 
     labels = kmeans.fit_predict(X)
+
+    # Reduce TF-IDF vectors to 2 dimensions for visualization
+    pca = PCA(n_components=2)
+
+    points = pca.fit_transform(X.toarray())
+
+    chart_data = []
+
+    for i in range(len(points)):
+        chart_data.append({
+        "x": float(points[i][0]),
+        "y": float(points[i][1]),
+        "cluster": int(labels[i])
+    })
 
     results = []
 
@@ -458,7 +475,8 @@ def clustering():
     return render_template(
         "clustering.html",
         clusters=results,
-        cluster_counts=cluster_counts
+        cluster_counts=cluster_counts,
+        chart_data=chart_data
     )
 
 @app.route("/profile")
@@ -478,14 +496,20 @@ def profile():
 
     user = cursor.fetchone()
 
-    cursor.execute("SELECT COUNT(*) FROM scan_history")
+    cursor.execute("""
+    SELECT COUNT(*)
+    FROM scan_history
+    WHERE email=?
+""", (session["user_email"],))
+
     total = cursor.fetchone()[0]
 
     cursor.execute("""
-        SELECT COUNT(*)
-        FROM scan_history
-        WHERE prediction='Spam'
-    """)
+    SELECT COUNT(*)
+    FROM scan_history
+    WHERE email=? AND prediction='Spam'
+""", (session["user_email"],))
+
     spam = cursor.fetchone()[0]
 
     conn.close()

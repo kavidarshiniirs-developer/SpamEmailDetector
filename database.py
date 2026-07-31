@@ -30,4 +30,3 @@ CREATE TABLE IF NOT EXISTS scan_history (
 conn.commit()
 conn.close()
 
-print("Database and users table created successfully!")

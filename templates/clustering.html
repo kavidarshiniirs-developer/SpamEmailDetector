@@ -95,7 +95,7 @@
 
     <!-- Scatter Chart -->
 
-    <div class="glass-card">
+    <div class="glass-card" id="clusterResult">
 
         <h2>
 
@@ -125,7 +125,7 @@
 
         </h2>
         {% if message %}
-<div class="info-message">
+<div class="info-message" id="clusterResult">
     {{ message }}
 </div>
 {% endif %}
@@ -332,6 +332,96 @@ new Chart(document.getElementById("clusterChart"),{
                 grid:{
 
                     color:"rgba(255,255,255,.08)"
+
+                }
+
+            }
+
+        }
+
+    }
+
+});
+
+</script>
+
+<script>
+
+window.onload = function(){
+
+    const result = document.getElementById("clusterResult");
+
+    if(result){
+
+        result.scrollIntoView({
+
+            behavior:"smooth",
+
+            block:"start"
+
+        });
+
+    }
+
+};
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+const ctx = document.getElementById("clusterChart");
+
+new Chart(ctx, {
+
+    type: "bar",
+
+    data: {
+
+        labels: [
+
+            "Cluster 0",
+
+            "Cluster 1",
+
+            "Cluster 2"
+
+        ],
+
+        datasets: [{
+
+            label: "Spam Emails",
+
+            data: {{ cluster_counts | tojson }},
+
+            backgroundColor: [
+
+                "#3b82f6",
+
+                "#10b981",
+
+                "#f59e0b"
+
+            ],
+
+            borderRadius: 8
+
+        }]
+
+    },
+
+    options: {
+
+        responsive: true,
+
+        scales: {
+
+            y: {
+
+                beginAtZero: true,
+
+                ticks: {
+
+                    stepSize: 1
 
                 }
 
